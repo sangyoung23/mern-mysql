@@ -23,13 +23,65 @@ app.get("/", (req, res) => {
   res.json("back server");
 });
 
-db.query("select from messages", (err, result) => {
-  if (err) {
-    console.log(err);
-  } else {
-    console.log(result);
-  }
-});
+// 로그인 유효성 검사
+app.post("/login", (req, res) => {
+  const {username, password} = req.body
+
+  const sql = "SELECT * FROM messages WHERE username = ? AND password = ?"
+
+  db.query(sql, [username, password], (err, result) => {
+    if (err) {
+      console.log(err)
+      res.status(500).send("Internal Server Error")
+    } else {
+      // 일치하는 회원이 있음
+      if(result.length > 0) {
+        res.status(200).send({success: true, message: "find a username"})
+      } 
+      // 일치하는 회원이 없음
+      else {
+        res.status(401).send({success: false, message: "일치하는 회원이 없습니다."})
+      }
+    }
+  });
+})
+
+// 회원가입 전 유효성 검사
+app.post("/register", (req, res) => {
+  const {username} = req.body
+
+  const sql = "SELECT * FROM messages WHERE username = ?"
+
+  db.query(sql, [username], (err, result) => {
+    if (err) {
+      res.status(500).send("Internal Server Error")
+    } else {
+      // 일치하는 회원이 있음
+      if(result.length > 0) {
+        res.status(401).send({success: false, message: "중복된 아이디입니다."})
+      } 
+      // 일치하는 회원이 없음
+      else {
+        res.status(200).send({success: true, message: "사용 가능한 아이디입니다."})
+      }
+    }
+  });
+})
+
+// 회원가입
+app.post("/auth/register", (req, res) => {
+  const {username, password} = req.body
+
+  const sql = "INSERT INTO messages (`username`, `password`) VALUES (?, ?)"
+
+  db.query(sql, [username, password], (err, result) => {
+    if (err) {
+      res.status(500).send("Internal Serve Error")
+    } else {
+      res.status(200).send({success: true, message: "회원가입 성공"})
+    }
+  })
+})
 
 // mysql table 연결
 

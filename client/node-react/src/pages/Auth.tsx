@@ -1,26 +1,61 @@
 import React, { useState } from "react";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function Auth() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("")
+
+  const navigate = useNavigate()
+
+  const handleChangeUsername = (e) => {
+    setUsername(e.target.value)
+  }
+
+  const handleChangePassword = (e) => {
+    setPassword(e.target.value)
+  }
+
+  const handleClickLogin = async (e) => {
+    e.preventDefault()
+
+    let body = {
+      username: username,
+      password: password
+    }
+
+    try {
+      let res = await axios.post("http://localhost:8800/login", body)
+
+      // 로그인 성공
+      if (res.data.success) {
+        navigate("/")
+      }
+    } 
+    // 로그인 실패시에는 try 안에 조건을 거는게 아니라 catch문에서 에러처리를 해줘야함
+    catch(err) {
+      setMessage(err.response.data.message)
+    }
+  }
 
   return (
     <Form>
       <Form.Group className="mb-3" controlId="formBasicUsername">
         <Form.Label>username</Form.Label>
-        <Form.Control type="text" placeholder="Enter username" />
+        <Form.Control onChange={handleChangeUsername} name="username" type="text" placeholder="Enter username" />
       </Form.Group>
 
       <Form.Group className="mb-3" controlId="formBasicPassword">
         <Form.Label>Password</Form.Label>
-        <Form.Control type="password" placeholder="Password" />
+        <Form.Control onChange={handleChangePassword} type="password" placeholder="Password" />
       </Form.Group>
 
-      {/* 가입된 유저가 아니면 메시지 띄우기 , 회원가입으로 이동 */}
-      <Button variant="primary" type="submit">
+      <p>{message}</p>
+      <p>계정이 없으신가요? <Link to={"/register"}>회원가입</Link></p>
+      <Button onClick={handleClickLogin} variant="primary" type="submit">
         Login
       </Button>
     </Form>
