@@ -15,6 +15,12 @@ app.use(express.json());
 import cors from "cors";
 app.use(cors());
 
+// socketio
+import socketio from 'socket.io'
+import http from 'http'
+const server = http.createServer(app)
+const io = socketio(server)
+
 app.listen(8800, () => {
   console.log("Connected to server");
 });
