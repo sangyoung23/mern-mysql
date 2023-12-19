@@ -1,21 +1,35 @@
-import React, { useState } from 'react'
-import queryString from 'query-string'
+import React, { useEffect } from 'react'
 import io from 'socket.io-client'
-
-import './chat.css'
-import InfoBar from '../components/InfoBar/InfoBar'
-import Messages from "../components/Messages/Messages"
-import TextContainer from "../components/TextContainer/TextContainer";
-import Input from "../components/Input/Input";
-
-const ENDPOINT = 'http://localhost:8800';
-let sokect;
+import socket from 'socket.io-client/lib/socket'
 
 function Chat() {
-    const [name, setName] = useState("")
-    const [room, setRoom] = useState("")
-    const [users, setUsers] = useState("")
-    return (<div></div>)
+    const socket = io('http://localhost:8800')
+    
+    useEffect(() => {
+
+        socket.on('connect', () => {
+            console.log('Connected to server')
+        })
+
+        socket.on('message', (data: string) => {
+            console.log('Received message:', data)
+        })
+
+        return () => {
+            socket.disconnect() // 컴포넌트 언마운트 시 연결 종료
+        }
+    }, [])
+
+    const sendMessage = (message: string) => {
+        socket.emit('sendMessage', message);
+      };
+    
+      return (
+        <div>
+          {/* 채팅 화면 및 입력 폼 */}
+          <button onClick={() => sendMessage('send Message!')}>전송</button>
+        </div>
+      );
 }
 
 export default Chat

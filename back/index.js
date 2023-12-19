@@ -15,11 +15,28 @@ app.use(express.json());
 import cors from "cors";
 app.use(cors());
 
-// socketio
-import socketio from 'socket.io'
+// // socketio
 import http from 'http'
-const server = http.createServer(app)
-const io = socketio(server)
+import { Server } from 'socket.io'
+// const http = require('http');
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: '*'
+  }
+})
+
+io.on('connection', (socket) => {
+  console.log('User connected');
+
+  socket.on('sendMessage', (message) => {
+    io.emit('message', message); // 모든 연결된 클라이언트에게 메시지 전송
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected');
+  });
+});
 
 app.listen(8800, () => {
   console.log("Connected to server");
